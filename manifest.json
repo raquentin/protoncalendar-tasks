@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Proton Calendar Tasks",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "adds tasks/checkboxes to events in Proton Calendar",
   "permissions": [
     "storage"
