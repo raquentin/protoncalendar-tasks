@@ -1,6 +1,10 @@
 # protoncalendar-tasks
 
-fulfills [a promise that Proton has ignored for three years](https://proton.me/blog/proton-mail-calendar-roadmap): tasks in the calendar.
+fulfills a promise that [Proton has ignored for three years](https://proton.me/blog/proton-mail-calendar-roadmap): tasks in the calendar.
+
+![protoncalendar-tasks](https://github.com/user-attachments/assets/13ced99e-3a46-4213-8da3-1850d29baa37)
+
+
 
 ## Installation
 
