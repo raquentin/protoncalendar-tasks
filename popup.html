@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proton Calendar Tasks</title>
+  <style>
+    body {
+      width: 300px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+    
+    h1 {
+      font-size: 16px;
+      margin: 0 0 18px 0;
+      color: #fff;
+      font-weight: 500;
+    }
+    
+    .section {
+      margin-bottom: 18px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    
+    .section p {
+      margin: 0 0 8px 0;
+    }
+    
+    .step {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      background: #6d4aff;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    
+    code {
+      background: #2a2a2a;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #a0a0a0;
+    }
+    
+    .example {
+      background: #2a2a2a;
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      margin-top: 8px;
+      color: #b0b0b0;
+      border-left: 2px solid #6d4aff;
+    }
+    
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 14px;
+      border-top: 1px solid #333;
+      font-size: 11px;
+      color: #666;
+    }
+    
+    a {
+      color: #8b7aff;
+      text-decoration: none;
+    }
+    
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .divider {
+      height: 1px;
+      background: #333;
+      margin: 18px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Proton Calendar Tasks</h1>
+  
+  <div class="section">
+    <p>It works by prefixing event names:</p>
+    <div class="example">[ ] unchecked task<br>[x] completed task</div>
+  </div>
+
+  <div class="divider"></div>
+  
+  <div class="section">
+    <div class="step">
+      <span class="step-number">1</span>
+      <span>click the checkbox to toggle</span>
+    </div>
+    <div class="step">
+      <span class="step-number">2</span>
+      <span>quickly click the event body again to save</span>
+    </div>
+    <div class="step">
+      <span class="step-number">3</span>
+      <span>wait a few seconds for the change to save remotely</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  
+  <div class="section">
+    <p style="color: #888; font-size: 12px;">only works with all-day events in the top bar</p>
+  </div>
+
+  <div class="footer">
+    <span>by raquentin</span>
+    <a href="https://github.com/raquentin/protoncalendar-tasks" target="_blank">github</a>
+  </div>
+</body>
+</html>
