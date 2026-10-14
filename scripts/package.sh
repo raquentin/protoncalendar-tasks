@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo "packaging extension..."
 
@@ -15,7 +15,9 @@ VERSION=$(grep '"version"' manifest.json | sed -E 's/.*"([0-9.]+)".*/\1/')
 
 FILES=(
     "manifest.json"
+    "lib/tasks.js"
     "content.js"
+    "popup.js"
     "styles.css"
     "popup.html"
     "icons/icon16.png"

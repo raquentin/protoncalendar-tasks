@@ -96,6 +96,24 @@
       background: #333;
       margin: 18px 0;
     }
+    .setting {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .setting input {
+      accent-color: #6d4aff;
+      margin: 3px 0 0 0;
+    }
+
+    .setting small {
+      display: block;
+      color: #888;
+      font-size: 11px;
+    }
   </style>
 </head>
 <body>
@@ -103,7 +121,7 @@
   
   <div class="section">
     <p>It works by prefixing event names:</p>
-    <div class="example">[ ] unchecked task<br>[x] completed task</div>
+    <div class="example">[ ] unchecked task<br>[-] in progress<br>[x] completed task</div>
   </div>
 
   <div class="divider"></div>
@@ -115,23 +133,35 @@
     </div>
     <div class="step">
       <span class="step-number">2</span>
-      <span>click the event to save the change</span>
+      <span>the change saves automatically. if the event starts pulsing, click it once to finish saving</span>
     </div>
     <div class="step">
       <span class="step-number">3</span>
-      <span>wait a few seconds for the change to save remotely</span>
+      <span>unfinished tasks from past days? use <b>carry over</b> next to Today to move them</span>
     </div>
   </div>
 
   <div class="divider"></div>
-  
+
   <div class="section">
-    <p style="color: #888; font-size: 12px;">works with both all-day and timed events</p>
+    <label class="setting">
+      <input type="checkbox" id="autoSave">
+      <span>save automatically<small>turn off to always click the event to save</small></span>
+    </label>
+    <label class="setting">
+      <input type="checkbox" id="cycleInProgress">
+      <span>cycle through in progress<small>[ ] &rarr; [-] &rarr; [x] instead of [ ] &rarr; [x]</small></span>
+    </label>
+    <label class="setting">
+      <input type="checkbox" id="hideCompleted">
+      <span>hide completed<small>[x] events disappear once saved; untick this to see them again</small></span>
+    </label>
   </div>
 
   <div class="footer">
-    <span>by raquentin, matlegault</span>
+    <span id="version"></span>
     <a href="https://github.com/raquentin/protoncalendar-tasks" target="_blank">github</a>
   </div>
+  <script src="popup.js"></script>
 </body>
 </html>

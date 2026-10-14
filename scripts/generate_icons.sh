@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-if ! command -v convert &> /dev/null; then
+if ! command -v magick &> /dev/null; then
     echo "error: imagemagick not found"
     echo "install: brew install imagemagick"
     exit 1

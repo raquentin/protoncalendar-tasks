@@ -1,0 +1,14 @@
+{
+  "name": "protoncalendar-tasks",
+  "private": true,
+  "scripts": {
+    "test": "playwright test --project=mock",
+    "test:live": "playwright test --project=live",
+    "auth": "node scripts/auth.mjs",
+    "inspect": "node scripts/inspect.mjs",
+    "package": "./scripts/package.sh"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.54.1"
+  }
+}

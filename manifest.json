@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Proton Calendar Tasks",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "adds tasks/checkboxes to events in Proton Calendar",
   "permissions": [
     "storage"
@@ -11,9 +11,16 @@
   ],
   "content_scripts": [
     {
-      "matches": ["https://calendar.proton.me/*"],
-      "js": ["content.js"],
-      "css": ["styles.css"],
+      "matches": [
+        "https://calendar.proton.me/*"
+      ],
+      "js": [
+        "lib/tasks.js",
+        "content.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -29,6 +36,11 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "protoncalendar-tasks@raquentin.github.io",
+      "strict_min_version": "109.0"
+    }
   }
 }
-

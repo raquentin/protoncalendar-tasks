@@ -25,3 +25,9 @@ __pycache__/
 .direnv/
 result
 result-*
+# playwright
+test-results/
+playwright-report/
+# logged-in proton profile and dumps of real calendar data, never commit
+.auth/
+.inspect/

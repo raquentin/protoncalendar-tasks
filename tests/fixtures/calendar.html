@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>mock proton calendar</title>
+  <!-- mock proton calendar, configured via window.__mockConfig -->
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 20px; background: #fff; }
+    .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .row { display: flex; flex-direction: column; gap: 4px; width: 320px; }
+    .calendar-dayeventcell { height: 22px; list-style: none; }
+    .calendar-dayeventcell-inner {
+      display: flex; height: 100%; padding: 0 6px; border-radius: 4px;
+      background: var(--color-main); color: #fff; cursor: pointer;
+    }
+    .calendar-dayeventcell-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .grid { display: flex; gap: 8px; margin-top: 12px; }
+    .calendar-grid-gridcell { position: relative; width: 160px; min-height: 60px; border: 1px dashed #ccc; }
+    .calendar-eventcell { height: 40px; background: #3cbb3a; color: #fff; border-radius: 4px; overflow: hidden; }
+    .calendar-eventcell-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .eventpopover, .modal-two { position: fixed; top: 120px; left: 400px; padding: 12px; background: #eee; border: 1px solid #999; }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button type="button" data-testid="calendar-toolbar:today" class="button button-medium button-outline-weak shrink-0">Today</button>
+    <span>October 2026</span>
+  </div>
+  <ul class="row" id="allday"></ul>
+  <div class="grid" id="timed"></div>
+
+  <script>
+    (function () {
+      const config = Object.assign({
+        events: [],
+        today: '2026-10-14',
+        popoverMode: 'click',
+        saveDelay: 150,
+      }, window.__mockConfig || {});
+
+      const state = window.__mock = {
+        events: config.events.map(e => ({ date: config.today, ...e })),
+        saves: [],
+        moves: [],
+        recurringScopes: [],
+        popoverOpens: 0,
+        rendered: new Map(),
+      };
+
+      const row = document.getElementById('allday');
+      const grid = document.getElementById('timed');
+
+      const toDate = (iso) => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); };
+      const pad = (n) => String(n).padStart(2, '0');
+      const toISO = (dt) => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+      const ordinal = (n) => n + (n % 10 === 1 && n !== 11 ? 'st' : n % 10 === 2 && n !== 12 ? 'nd' : n % 10 === 3 && n !== 13 ? 'rd' : 'th');
+      const cellLabel = (iso) => toDate(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      const columnLabel = (iso) => {
+        const dt = toDate(iso);
+        return `${dt.toLocaleDateString('en-US', { weekday: 'long' })}, ${dt.toLocaleDateString('en-US', { month: 'long' })} ${ordinal(dt.getDate())}, ${dt.getFullYear()}`;
+      };
+      const inputLabel = (iso) => toDate(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const parseInput = (text) => { const dt = new Date(text); return isNaN(dt) ? null : toISO(dt); };
+      // proton's all-day datetime attribute is a day early
+      const dayBefore = (iso) => { const dt = toDate(iso); dt.setDate(dt.getDate() - 1); return toISO(dt); };
+
+      // opens on mousedown, like proton
+      function bindOpen(el, id) {
+        const open = (e) => {
+          if (config.popoverMode === 'trusted' && !e.isTrusted) return;
+          openPopover(id);
+        };
+        el.addEventListener('mousedown', open);
+        el.addEventListener('keydown', (e) => { if (e.key === 'Enter') open(e); });
+      }
+
+      function createAllDayCell(event) {
+        const cell = document.createElement('li');
+        cell.className = 'calendar-dayeventcell';
+        cell.innerHTML = `
+          <div class="calendar-dayeventcell-inner text-left flex isLoaded" role="button" tabindex="0"
+               style="--color-main: #ec3e7c;">
+            <div class="flex flex-nowrap flex-1 items-center">
+              <span data-testid="calendar-view:all-day-event" class="flex-1 text-ellipsis">
+                <span class="calendar-dayeventcell-title"></span>
+                <div class="sr-only"><div><time></time></div></div>
+              </span>
+            </div>
+          </div>`;
+        bindOpen(cell.querySelector('.calendar-dayeventcell-inner'), event.id);
+        row.appendChild(cell);
+        return cell;
+      }
+
+      function columnFor(iso) {
+        let column = grid.querySelector(`[data-date="${iso}"]`);
+        if (!column) {
+          column = document.createElement('div');
+          column.className = 'flex-1 relative calendar-grid-gridcell h-full';
+          column.dataset.testid = 'calendar-week-day-view:weekday-column';
+          column.setAttribute('data-testid', 'calendar-week-day-view:weekday-column');
+          column.setAttribute('role', 'region');
+          column.setAttribute('aria-label', columnLabel(iso));
+          column.dataset.date = iso;
+          grid.appendChild(column);
+        }
+        return column;
+      }
+
+      function createTimedCell(event) {
+        const cell = document.createElement('div');
+        cell.className = 'calendar-eventcell isLoaded';
+        cell.setAttribute('role', 'button');
+        cell.tabIndex = 0;
+        cell.innerHTML = `
+          <div data-testid="calendar-day-week-view:part-day-event" class="calendar-eventcell-title"></div>
+          <div class="text-ellipsis calendar-eventcell-timestring sr-only">10:30pm - 11pm</div>`;
+        bindOpen(cell, event.id);
+        return cell;
+      }
+
+      // only touch the dom on change, like react
+      function render() {
+        for (const event of state.events) {
+          let cell = document.querySelector(`[data-event-id="${event.id}"]`);
+          if (!cell) {
+            cell = event.timed ? createTimedCell(event) : createAllDayCell(event);
+            cell.dataset.eventId = event.id;
+          }
+          const key = `${event.title}|${event.date}`;
+          if (state.rendered.get(event.id) === key) continue;
+          const previous = state.rendered.get(event.id);
+          state.rendered.set(event.id, key);
+
+          if (!previous || previous.split('|')[0] !== event.title) {
+            (cell.querySelector('.calendar-dayeventcell-inner') || cell).title = event.title;
+            cell.querySelector('.calendar-dayeventcell-title, .calendar-eventcell-title').textContent = event.title;
+          }
+          if (event.timed) {
+            const column = columnFor(event.date);
+            if (cell.parentElement !== column) column.appendChild(cell);
+          } else {
+            const time = cell.querySelector('time');
+            time.setAttribute('datetime', dayBefore(event.date));
+            time.textContent = cellLabel(event.date);
+          }
+        }
+      }
+
+      function closeAll() {
+        document.querySelectorAll('.eventpopover, .modal-two').forEach(el => el.remove());
+      }
+
+      function openPopover(id) {
+        closeAll();
+        state.popoverOpens++;
+        const event = state.events.find(e => e.id === id);
+        const popover = document.createElement('div');
+        popover.className = 'relative eventpopover flex flex-column flex-nowrap outline-none';
+        popover.innerHTML = `<h1 class="eventpopover-title"></h1><button data-testid="event-popover:edit">Edit</button>`;
+        popover.querySelector('.eventpopover-title').textContent = event.title;
+        popover.querySelector('button').addEventListener('click', () => openModal(id));
+        setTimeout(() => document.body.appendChild(popover), 50);
+      }
+
+      function openModal(id) {
+        closeAll();
+        const event = state.events.find(e => e.id === id);
+        const draft = { title: event.title, date: event.date };
+        const modal = document.createElement('div');
+        modal.className = 'modal-two';
+        modal.innerHTML = `
+          <div class="modal-two-dialog-container">
+            <input id="event-title-input">
+            <input id="event-date-input" type="text" placeholder="E.g., Oct 14, 2026">
+            <input id="event-endDate" type="text">
+            <button data-testid="create-event-modal:save" type="submit">Save</button>
+          </div>`;
+        const title = modal.querySelector('#event-title-input');
+        const date = modal.querySelector('#event-date-input');
+        const endDate = modal.querySelector('#event-endDate');
+        title.value = draft.title;
+        date.value = endDate.value = inputLabel(draft.date);
+        title.addEventListener('input', () => { draft.title = title.value; });
+        const commitDate = () => {
+          const iso = parseInput(date.value);
+          if (iso) draft.date = iso;
+          date.value = endDate.value = inputLabel(draft.date);
+        };
+        date.addEventListener('keydown', (e) => { if (e.key === 'Enter') commitDate(); });
+        date.addEventListener('blur', commitDate);
+
+        modal.querySelector('[data-testid="create-event-modal:save"]').addEventListener('click', () => {
+          if (event.recurring) return askRecurring(modal, event, draft);
+          commit(event, draft);
+        });
+        setTimeout(() => document.body.appendChild(modal), 50);
+      }
+
+      function askRecurring(modal, event, draft) {
+        const prompt = document.createElement('div');
+        prompt.className = 'modal-two';
+        prompt.innerHTML = `
+          <div class="modal-two-dialog-container">
+            <h1>Update recurring event</h1>
+            ${['This event', 'This and future events', 'All events'].map((label, i) => `
+              <label><input type="radio" name="recurringType" id="recurringTypeChoice${i}"
+                data-testid="update-recurring-popover:update-option-radio" ${i === 0 ? 'checked' : ''}>${label}</label>`).join('')}
+            <button type="button" data-mock="update">Update</button>
+            <button type="reset" data-mock="cancel">Cancel</button>
+          </div>`;
+        prompt.querySelector('[data-mock="update"]').addEventListener('click', () => {
+          const checked = [...prompt.querySelectorAll('input')].findIndex(i => i.checked);
+          state.recurringScopes.push(['this', 'future', 'all'][checked]);
+          prompt.remove();
+          commit(event, draft);
+        });
+        prompt.querySelector('[data-mock="cancel"]').addEventListener('click', () => prompt.remove());
+        document.body.appendChild(prompt);
+      }
+
+      function commit(event, draft) {
+        closeAll();
+        state.saves.push({ id: event.id, title: draft.title });
+        if (draft.date !== event.date) state.moves.push({ id: event.id, from: event.date, to: draft.date });
+        setTimeout(() => { event.title = draft.title; event.date = draft.date; render(); }, config.saveDelay);
+      }
+
+      state.rename = (id, title) => {
+        state.events.find(e => e.id === id).title = title;
+        render();
+      };
+      state.eventDate = (id) => state.events.find(e => e.id === id).date;
+
+      render();
+    })();
+  </script>
+</body>
+</html>

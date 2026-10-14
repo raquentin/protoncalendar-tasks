@@ -4,8 +4,6 @@ fulfills a promise that [Proton has ignored for three years](https://proton.me/b
 
 ![protoncalendar-tasks](https://github.com/user-attachments/assets/13ced99e-3a46-4213-8da3-1850d29baa37)
 
-
-
 ## Installation
 
 ### Chromium, Edge, Brave
@@ -28,8 +26,22 @@ Note: The extension will be removed when you close Firefox. For permanent instal
 
 ## Usage
 
-1. Create an all-day event in Proton Calendar
+1. Create an event in Proton Calendar
 2. Start the event name with:
    - `[ ]` for an unchecked task
+   - `[-]` for an in-progress task
    - `[x]` for a completed task
-4. Click the checkbox to toggle, then quickly click the event again to save
+3. Click the checkbox to toggle
+
+Unfinished tasks from past days can be moved with **Carry over** next to **Today**.
+
+## Development
+
+```sh
+nix develop
+npm install
+npm test                             # offline, against a mock calendar
+npm run auth                         # log in once
+npm run test:live                    # read-only, against the real calendar
+PCT_LIVE_WRITE=1 npm run test:live   # also creates and deletes pct-* events
+```
